@@ -34,7 +34,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3000
       LOG_LEVEL: info
       DATABASE_URL: postgresql://naporta:naporta@postgres:5432/naporta?schema=public
@@ -45,6 +45,9 @@ services:
       CORS_ORIGINS: '*'
       RATE_LIMIT_TTL: 60
       RATE_LIMIT_MAX: 100
+      MEMORY_HEAP_LIMIT_MB: 256
+      DB_PING_TIMEOUT_MS: 2000
+      TRUST_PROXY: 0
     ports:
       - '3000:3000'
     command: >
