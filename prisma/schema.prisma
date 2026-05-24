@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  CANCELED
+}
+
+model User {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique
+  passwordHash     String
+  refreshTokenHash String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  statusChanges OrderStatusHistory[]
+  deletedOrders Order[]              @relation("OrderDeletedBy")
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Order {
+  id     String @id @default(uuid()) @db.Uuid
+  number String @unique
+
+  customerName     String
+  customerDocument String
+
+  deliveryZipCode    String
+  deliveryStreet     String
+  deliveryNumber     String
+  deliveryComplement String?
+  deliveryDistrict   String
+  deliveryCity       String
+  deliveryState      String  @db.Char(2)
+  deliveryCountry    String  @default("BR")
+
+  deliveryForecastAt DateTime
+  status             OrderStatus @default(PENDING)
+
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([number])
+  @@index([status, deletedAt])
+  @@index([createdAt])
+  @@index([customerDocument])
+  @@index([deletedAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String @id @default(uuid()) @db.Uuid
+  orderId     String @db.Uuid
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  description String
+  priceCents  Int
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id          String       @id @default(uuid()) @db.Uuid
+  orderId     String       @db.Uuid
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  changedById String?      @db.Uuid
+  changedBy   User?        @relation(fields: [changedById], references: [id])
+  changedAt   DateTime     @default(now())
+
+  @@index([orderId, changedAt])
+  @@map("order_status_history")
+}
