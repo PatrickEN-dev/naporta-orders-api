@@ -30,8 +30,8 @@ export class Address extends ValueObject<AddressProps> {
 
   static create(input: AddressInput): Address {
     const zipCode = input.zipCode.replace(/\D/g, '');
-    assert(zipCode.length === 8, 'zipCode must contain 8 digits');
-    assert(input.state.length === 2, 'state must be a 2-letter UF code');
+    assert(zipCode.length === 8, 'CEP deve conter 8 dígitos');
+    assert(input.state.length === 2, 'UF deve ter exatamente 2 letras');
     return new Address({
       zipCode,
       street: input.street.trim(),

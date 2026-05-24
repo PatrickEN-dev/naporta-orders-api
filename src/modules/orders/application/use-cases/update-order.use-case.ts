@@ -16,7 +16,7 @@ export class UpdateOrderUseCase {
 
   async execute(input: UpdateOrderInput): Promise<Order> {
     const order = await this.orders.findById(input.orderId);
-    if (!order) throw new NotFoundError(`Order ${input.orderId} not found`);
+    if (!order) throw new NotFoundError(`pedido ${input.orderId} não encontrado`);
 
     if (input.deliveryAddress) {
       order.changeDeliveryAddress(Address.create(input.deliveryAddress));

@@ -14,16 +14,18 @@ import { OrderItemDto } from './order-item.dto';
 
 export class CreateOrderRequestDto {
   @ApiProperty({ example: 'Mariana Silva' })
-  @IsString()
-  @MinLength(1)
+  @IsString({ message: 'customerName deve ser uma string' })
+  @MinLength(1, { message: 'customerName é obrigatório' })
   customerName!: string;
 
   @ApiProperty({
     example: '529.982.247-25',
     description: 'CPF ou CNPJ; aceita formatado ou apenas dígitos',
   })
-  @IsString()
-  @Matches(/^[\d.\-/\s]+$/, { message: 'customerDocument contains invalid characters' })
+  @IsString({ message: 'customerDocument deve ser uma string' })
+  @Matches(/^[\d.\-/\s]+$/, {
+    message: 'customerDocument deve conter apenas dígitos, pontos, traços e barra',
+  })
   customerDocument!: string;
 
   @ApiProperty({ type: OrderAddressDto })
@@ -31,14 +33,17 @@ export class CreateOrderRequestDto {
   @Type(() => OrderAddressDto)
   deliveryAddress!: OrderAddressDto;
 
-  @ApiProperty({ example: '2026-12-31T18:00:00.000Z' })
+  @ApiProperty({
+    example: '2027-12-31',
+    description: 'ISO 8601. Aceita "YYYY-MM-DD" ou "YYYY-MM-DDTHH:mm:ss.sssZ"',
+  })
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'deliveryForecastAt deve ser uma data ISO 8601 válida' })
   deliveryForecastAt!: Date;
 
   @ApiProperty({ type: [OrderItemDto] })
-  @IsArray()
-  @ArrayMinSize(1)
+  @IsArray({ message: 'items deve ser uma lista' })
+  @ArrayMinSize(1, { message: 'items deve conter ao menos 1 item' })
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items!: OrderItemDto[];

@@ -74,7 +74,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     return {
       status: 500,
-      payload: { code: 'INTERNAL_ERROR', message: 'Internal server error', requestId },
+      payload: { code: 'INTERNAL_ERROR', message: 'erro interno do servidor', requestId },
     };
   }
 }

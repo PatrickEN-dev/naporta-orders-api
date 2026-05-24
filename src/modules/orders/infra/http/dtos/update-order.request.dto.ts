@@ -25,10 +25,13 @@ export class UpdateOrderRequestDto {
   @Type(() => OrderAddressDto)
   deliveryAddress?: OrderAddressDto;
 
-  @ApiPropertyOptional({ example: '2026-12-31T18:00:00.000Z' })
+  @ApiPropertyOptional({
+    example: '2027-12-31',
+    description: 'ISO 8601. Aceita "YYYY-MM-DD" ou "YYYY-MM-DDTHH:mm:ss.sssZ"',
+  })
   @IsOptional()
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'deliveryForecastAt deve ser uma data ISO 8601 válida' })
   deliveryForecastAt?: Date;
 
   @ApiPropertyOptional({ enum: ORDER_STATUSES })
@@ -41,14 +44,14 @@ export class UpdateOrderRequestDto {
     description: 'Nota opcional registrada em OrderStatusHistory quando o status muda',
   })
   @IsOptional()
-  @IsString()
-  @MaxLength(500)
+  @IsString({ message: 'statusNote deve ser uma string' })
+  @MaxLength(500, { message: 'statusNote deve ter no máximo 500 caracteres' })
   statusNote?: string;
 
   @ApiPropertyOptional({ type: [OrderItemDto] })
   @IsOptional()
-  @IsArray()
-  @ArrayMinSize(1)
+  @IsArray({ message: 'items deve ser uma lista' })
+  @ArrayMinSize(1, { message: 'items deve conter ao menos 1 item' })
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items?: OrderItemDto[];

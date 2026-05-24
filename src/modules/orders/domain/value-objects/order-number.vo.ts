@@ -6,7 +6,10 @@ export class OrderNumber {
   private constructor(readonly value: string) {}
 
   static create(value: string): OrderNumber {
-    assert(ORDER_NUMBER_PATTERN.test(value), 'Order number must match ORD-YYYY-NNNNNN');
+    assert(
+      ORDER_NUMBER_PATTERN.test(value),
+      'número do pedido deve seguir o formato ORD-YYYY-NNNNNN',
+    );
     return new OrderNumber(value);
   }
 

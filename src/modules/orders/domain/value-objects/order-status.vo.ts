@@ -3,7 +3,7 @@ import { InvalidStateError } from '../../../../shared/errors/domain.error';
 export const ORDER_STATUSES = ['PENDING', 'IN_TRANSIT', 'DELIVERED', 'CANCELED'] as const;
 export type OrderStatusValue = (typeof ORDER_STATUSES)[number];
 
-export const ORDER_STATUS_ENUM_MESSAGE = `status must be one of: ${ORDER_STATUSES.join(', ')}`;
+export const ORDER_STATUS_ENUM_MESSAGE = `status deve ser um dos valores: ${ORDER_STATUSES.join(', ')}`;
 
 const TRANSITIONS: Readonly<Record<OrderStatusValue, readonly OrderStatusValue[]>> = {
   PENDING: ['IN_TRANSIT', 'CANCELED'],
@@ -26,7 +26,7 @@ export class OrderStatus {
   transitionTo(next: OrderStatusValue): OrderStatus {
     const allowed = TRANSITIONS[this.value];
     if (!allowed.includes(next)) {
-      throw new InvalidStateError(`Cannot transition from ${this.value} to ${next}`);
+      throw new InvalidStateError(`transição inválida: de ${this.value} para ${next}`);
     }
     return new OrderStatus(next);
   }

@@ -63,11 +63,11 @@ export class Order extends AggregateRoot {
   }
 
   static create(props: CreateOrderProps): Order {
-    assert(props.customerName.trim().length > 0, 'customerName cannot be empty');
-    assert(props.items.length > 0, 'Order must contain at least one item');
+    assert(props.customerName.trim().length > 0, 'nome do cliente não pode ser vazio');
+    assert(props.items.length > 0, 'pedido precisa ter ao menos 1 item');
     assert(
       props.deliveryForecastAt.getTime() > Date.now(),
-      'deliveryForecastAt must be in the future',
+      'data de previsão de entrega deve ser futura',
     );
 
     const now = new Date();
@@ -134,7 +134,7 @@ export class Order extends AggregateRoot {
   }
 
   rescheduleDelivery(forecastAt: Date): void {
-    assert(forecastAt.getTime() > Date.now(), 'deliveryForecastAt must be in the future');
+    assert(forecastAt.getTime() > Date.now(), 'data de previsão de entrega deve ser futura');
     this._deliveryForecastAt = forecastAt;
     this.touch();
   }
@@ -145,7 +145,7 @@ export class Order extends AggregateRoot {
   }
 
   replaceItems(items: OrderItem[]): void {
-    assert(items.length > 0, 'Order must contain at least one item');
+    assert(items.length > 0, 'pedido precisa ter ao menos 1 item');
     this._items = [...items];
     this.recalculateTotal();
     this.touch();

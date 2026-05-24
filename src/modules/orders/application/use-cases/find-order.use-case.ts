@@ -9,7 +9,7 @@ export class FindOrderUseCase {
 
   async execute(id: string): Promise<Order> {
     const order = await this.orders.findById(id);
-    if (!order) throw new NotFoundError(`Order ${id} not found`);
+    if (!order) throw new NotFoundError(`pedido ${id} não encontrado`);
     return order;
   }
 }

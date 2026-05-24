@@ -12,14 +12,14 @@ export class Document extends ValueObject<{ digits: string }> {
   static create(raw: string): Document {
     const digits = raw.replace(/\D/g, '');
     if (digits.length === CPF_LENGTH) {
-      assert(isValidCpf(digits), 'Invalid CPF');
+      assert(isValidCpf(digits), 'CPF inválido');
       return new Document(digits);
     }
     if (digits.length === CNPJ_LENGTH) {
-      assert(isValidCnpj(digits), 'Invalid CNPJ');
+      assert(isValidCnpj(digits), 'CNPJ inválido');
       return new Document(digits);
     }
-    assert(false, 'Document must be a valid CPF (11 digits) or CNPJ (14 digits)');
+    assert(false, 'documento deve ser um CPF válido (11 dígitos) ou CNPJ válido (14 dígitos)');
   }
 
   get value(): string {

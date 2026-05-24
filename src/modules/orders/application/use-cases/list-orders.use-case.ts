@@ -24,11 +24,11 @@ export class ListOrdersUseCase {
   async execute(input: ListOrdersInput): Promise<PaginatedOrdersResult> {
     const page = input.page ?? DEFAULT_PAGE;
     const limit = Math.min(input.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
-    if (page < 1) throw new ValidationError('page must be >= 1');
-    if (limit < 1) throw new ValidationError('limit must be >= 1');
+    if (page < 1) throw new ValidationError('page deve ser maior ou igual a 1');
+    if (limit < 1) throw new ValidationError('limit deve ser maior ou igual a 1');
 
     if (input.startDate && input.endDate && input.startDate > input.endDate) {
-      throw new ValidationError('startDate must be before or equal to endDate');
+      throw new ValidationError('startDate deve ser anterior ou igual a endDate');
     }
 
     const sort = this.parseSort(input.sort);
@@ -55,7 +55,7 @@ export class ListOrdersUseCase {
     const direction = raw.startsWith('-') ? 'desc' : 'asc';
     const field = raw.replace(/^-/, '');
     if (!SORTABLE_FIELDS.has(field)) {
-      throw new ValidationError(`sort field must be one of: ${[...SORTABLE_FIELDS].join(', ')}`);
+      throw new ValidationError(`sort deve ser um dos valores: ${[...SORTABLE_FIELDS].join(', ')}`);
     }
     return { field: field as 'createdAt' | 'deliveryForecastAt', direction };
   }

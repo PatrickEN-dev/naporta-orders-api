@@ -23,10 +23,10 @@ export class SignInUseCase {
 
   async execute({ email, password }: SignInInput): Promise<AuthTokens> {
     const user = await this.users.findByEmail(email);
-    if (!user) throw new UnauthorizedError('Invalid credentials');
+    if (!user) throw new UnauthorizedError('credenciais inválidas');
 
     const isValid = await this.hash.verifyPassword(user.passwordHash, password);
-    if (!isValid) throw new UnauthorizedError('Invalid credentials');
+    if (!isValid) throw new UnauthorizedError('credenciais inválidas');
 
     const pair = await this.tokens.issueTokens({ sub: user.id, email: user.email });
     await this.users.updateRefreshToken(user.id, this.hash.hashToken(pair.refreshToken));

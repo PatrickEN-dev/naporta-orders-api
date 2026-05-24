@@ -10,7 +10,7 @@ import {
 export class ListOrdersQueryDto {
   @ApiPropertyOptional({ example: 'ORD-2026-000123' })
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'number deve ser uma string' })
   number?: string;
 
   @ApiPropertyOptional({ enum: ORDER_STATUSES })
@@ -18,31 +18,37 @@ export class ListOrdersQueryDto {
   @IsEnum(ORDER_STATUSES, { message: ORDER_STATUS_ENUM_MESSAGE })
   status?: OrderStatusValue;
 
-  @ApiPropertyOptional({ example: '2026-01-01T00:00:00.000Z' })
+  @ApiPropertyOptional({
+    example: '2026-01-01',
+    description: 'ISO 8601. Início do intervalo (createdAt)',
+  })
   @IsOptional()
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'startDate deve ser uma data ISO 8601 válida' })
   startDate?: Date;
 
-  @ApiPropertyOptional({ example: '2026-12-31T23:59:59.999Z' })
+  @ApiPropertyOptional({
+    example: '2026-12-31',
+    description: 'ISO 8601. Fim do intervalo (createdAt)',
+  })
   @IsOptional()
   @Type(() => Date)
-  @IsDate()
+  @IsDate({ message: 'endDate deve ser uma data ISO 8601 válida' })
   endDate?: Date;
 
   @ApiPropertyOptional({ default: 1, minimum: 1 })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: 'page deve ser um inteiro' })
+  @Min(1, { message: 'page deve ser maior ou igual a 1' })
   page?: number;
 
   @ApiPropertyOptional({ default: 20, minimum: 1, maximum: 100 })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
+  @IsInt({ message: 'limit deve ser um inteiro' })
+  @Min(1, { message: 'limit deve ser maior ou igual a 1' })
+  @Max(100, { message: 'limit deve ser menor ou igual a 100' })
   limit?: number;
 
   @ApiPropertyOptional({
@@ -50,6 +56,6 @@ export class ListOrdersQueryDto {
     description: 'createdAt | deliveryForecastAt; prefixo "-" = desc',
   })
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'sort deve ser uma string' })
   sort?: string;
 }

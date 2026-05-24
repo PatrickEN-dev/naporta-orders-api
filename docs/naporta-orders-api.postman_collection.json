@@ -119,7 +119,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customerName\": \"Mariana Silva\",\n  \"customerDocument\": \"529.982.247-25\",\n  \"deliveryAddress\": {\n    \"zipCode\": \"01310100\",\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1578\",\n    \"complement\": \"Apto 101\",\n    \"district\": \"Bela Vista\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"country\": \"BR\"\n  },\n  \"deliveryForecastAt\": \"2027-12-31T18:00:00.000Z\",\n  \"items\": [\n    { \"description\": \"Camiseta básica preta P\", \"priceCents\": 4990 },\n    { \"description\": \"Bermuda jeans M\", \"priceCents\": 8990 }\n  ]\n}"
+              "raw": "{\n  \"customerName\": \"Mariana Silva\",\n  \"customerDocument\": \"529.982.247-25\",\n  \"deliveryAddress\": {\n    \"zipCode\": \"01310100\",\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1578\",\n    \"complement\": \"Apto 101\",\n    \"district\": \"Bela Vista\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"country\": \"BR\"\n  },\n  \"deliveryForecastAt\": \"2027-12-31\",\n  \"items\": [\n    { \"description\": \"Camiseta básica preta P\", \"priceCents\": 4990, \"quantity\": 2 },\n    { \"description\": \"Bermuda jeans M\", \"priceCents\": 8990, \"quantity\": 1 }\n  ]\n}"
             },
             "description": "Cria um pedido. Retorna 201 com o pedido completo. Salva o `id` automaticamente em variável da collection."
           },
@@ -196,12 +196,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/v1/orders?startDate=2026-01-01T00:00:00.000Z&endDate=2026-12-31T23:59:59.999Z",
+              "raw": "{{baseUrl}}/v1/orders?startDate=2026-01-01&endDate=2026-12-31",
               "host": ["{{baseUrl}}"],
               "path": ["v1", "orders"],
               "query": [
-                { "key": "startDate", "value": "2026-01-01T00:00:00.000Z" },
-                { "key": "endDate", "value": "2026-12-31T23:59:59.999Z" }
+                { "key": "startDate", "value": "2026-01-01" },
+                { "key": "endDate", "value": "2026-12-31" }
               ]
             },
             "description": "Filtra por intervalo de data de criação (createdAt). Ambos opcionais e combináveis."
@@ -213,12 +213,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/v1/orders?status=IN_TRANSIT&startDate=2026-01-01T00:00:00.000Z&page=1&limit=10&sort=deliveryForecastAt",
+              "raw": "{{baseUrl}}/v1/orders?status=IN_TRANSIT&startDate=2026-01-01&page=1&limit=10&sort=deliveryForecastAt",
               "host": ["{{baseUrl}}"],
               "path": ["v1", "orders"],
               "query": [
                 { "key": "status", "value": "IN_TRANSIT" },
-                { "key": "startDate", "value": "2026-01-01T00:00:00.000Z" },
+                { "key": "startDate", "value": "2026-01-01" },
                 { "key": "page", "value": "1" },
                 { "key": "limit", "value": "10" },
                 { "key": "sort", "value": "deliveryForecastAt" }
@@ -252,9 +252,9 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"IN_TRANSIT\"\n}"
+              "raw": "{\n  \"status\": \"IN_TRANSIT\",\n  \"statusNote\": \"Enviado pela transportadora XYZ\"\n}"
             },
-            "description": "Transiciona o status. Transições válidas: PENDING → IN_TRANSIT, PENDING → CANCELED, IN_TRANSIT → DELIVERED, IN_TRANSIT → CANCELED."
+            "description": "Transiciona o status (opcionalmente com `statusNote` que é registrado em OrderStatusHistory). Transições válidas: PENDING → IN_TRANSIT, PENDING → CANCELED, IN_TRANSIT → DELIVERED, IN_TRANSIT → CANCELED."
           }
         },
         {
@@ -269,7 +269,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"deliveryForecastAt\": \"2028-01-15T18:00:00.000Z\"\n}"
+              "raw": "{\n  \"deliveryForecastAt\": \"2028-01-15\"\n}"
             },
             "description": "Altera a data prevista de entrega. Deve ser futura."
           }
@@ -286,7 +286,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    { \"description\": \"Camiseta atualizada\", \"priceCents\": 5990 },\n    { \"description\": \"Calça\", \"priceCents\": 15990 },\n    { \"description\": \"Meia\", \"priceCents\": 1990 }\n  ]\n}"
+              "raw": "{\n  \"items\": [\n    { \"description\": \"Camiseta atualizada\", \"priceCents\": 5990, \"quantity\": 1 },\n    { \"description\": \"Calça\", \"priceCents\": 15990, \"quantity\": 1 },\n    { \"description\": \"Meia\", \"priceCents\": 1990, \"quantity\": 3 }\n  ]\n}"
             },
             "description": "Substitui a lista de items inteiramente."
           }

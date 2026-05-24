@@ -22,17 +22,17 @@ export class RefreshTokenUseCase {
 
   async execute({ refreshToken }: RefreshTokenInput): Promise<AuthTokens> {
     const payload = await this.tokens.verifyRefreshToken(refreshToken).catch(() => {
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError('refresh token inválido');
     });
 
     const user = await this.users.findById(payload.sub);
     if (!user || !user.refreshTokenHash) {
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError('refresh token inválido');
     }
 
     if (!this.hash.matchesToken(user.refreshTokenHash, refreshToken)) {
       await this.users.updateRefreshToken(user.id, null);
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError('refresh token inválido');
     }
 
     const pair = await this.tokens.issueTokens({ sub: user.id, email: user.email });

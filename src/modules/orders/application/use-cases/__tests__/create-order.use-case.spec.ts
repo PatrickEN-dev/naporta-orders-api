@@ -47,6 +47,6 @@ describe('CreateOrderUseCase', () => {
         items: [{ description: 'X', priceCents: 1000, quantity: 1 }],
         actorId: null,
       }),
-    ).rejects.toThrow('deliveryForecastAt must be in the future');
+    ).rejects.toThrow('data de previsão de entrega deve ser futura');
   });
 });

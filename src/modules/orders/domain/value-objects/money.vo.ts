@@ -7,7 +7,7 @@ export class Money extends ValueObject<{ cents: number }> {
   }
 
   static fromCents(cents: number): Money {
-    assertNonNegativeInteger(cents, 'Money must be a non-negative integer number of cents');
+    assertNonNegativeInteger(cents, 'valor monetário deve ser um inteiro não-negativo em centavos');
     return new Money(cents);
   }
 

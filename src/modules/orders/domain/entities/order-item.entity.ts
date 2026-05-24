@@ -23,8 +23,11 @@ export class OrderItem extends Entity {
 
   static create(props: OrderItemProps): OrderItem {
     const description = props.description.trim();
-    assert(description.length > 0, 'OrderItem description cannot be empty');
-    assertPositiveInteger(props.quantity, 'OrderItem quantity must be a positive integer');
+    assert(description.length > 0, 'descrição do item não pode ser vazia');
+    assertPositiveInteger(
+      props.quantity,
+      'quantidade do item deve ser um inteiro maior ou igual a 1',
+    );
     return new OrderItem({ ...props, description });
   }
 

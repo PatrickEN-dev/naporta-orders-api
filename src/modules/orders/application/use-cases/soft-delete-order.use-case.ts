@@ -8,7 +8,7 @@ export class SoftDeleteOrderUseCase {
 
   async execute(id: string): Promise<void> {
     const order = await this.orders.findById(id);
-    if (!order) throw new NotFoundError(`Order ${id} not found`);
+    if (!order) throw new NotFoundError(`pedido ${id} não encontrado`);
     order.softDelete();
     await this.orders.save(order);
   }
