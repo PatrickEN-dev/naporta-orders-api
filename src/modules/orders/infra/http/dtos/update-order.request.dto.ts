@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import {
   ORDER_STATUSES,
+  ORDER_STATUS_ENUM_MESSAGE,
   type OrderStatusValue,
 } from '../../../domain/value-objects/order-status.vo';
 import { OrderAddressDto } from './order-address.dto';
@@ -32,7 +33,7 @@ export class UpdateOrderRequestDto {
 
   @ApiPropertyOptional({ enum: ORDER_STATUSES })
   @IsOptional()
-  @IsEnum(ORDER_STATUSES)
+  @IsEnum(ORDER_STATUSES, { message: ORDER_STATUS_ENUM_MESSAGE })
   status?: OrderStatusValue;
 
   @ApiPropertyOptional({

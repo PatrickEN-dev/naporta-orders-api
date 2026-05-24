@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import {
   ORDER_STATUSES,
+  ORDER_STATUS_ENUM_MESSAGE,
   type OrderStatusValue,
 } from '../../../domain/value-objects/order-status.vo';
 
@@ -14,7 +15,7 @@ export class ListOrdersQueryDto {
 
   @ApiPropertyOptional({ enum: ORDER_STATUSES })
   @IsOptional()
-  @IsEnum(ORDER_STATUSES)
+  @IsEnum(ORDER_STATUSES, { message: ORDER_STATUS_ENUM_MESSAGE })
   status?: OrderStatusValue;
 
   @ApiPropertyOptional({ example: '2026-01-01T00:00:00.000Z' })

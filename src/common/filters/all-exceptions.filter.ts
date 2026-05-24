@@ -1,6 +1,7 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException } from '@nestjs/common';
 import type { Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
+import { randomUUID } from 'node:crypto';
 import { DomainError } from '../../shared/errors/domain.error';
 import type { RequestWithId } from '../http/request-with-id';
 
@@ -36,7 +37,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<RequestWithId>();
-    const requestId = request.id ?? 'unknown';
+    const requestId = request.id ?? randomUUID();
 
     const { status, payload } = this.toErrorResponse(exception, requestId);
 

@@ -3,6 +3,8 @@ import { InvalidStateError } from '../../../../shared/errors/domain.error';
 export const ORDER_STATUSES = ['PENDING', 'IN_TRANSIT', 'DELIVERED', 'CANCELED'] as const;
 export type OrderStatusValue = (typeof ORDER_STATUSES)[number];
 
+export const ORDER_STATUS_ENUM_MESSAGE = `status must be one of: ${ORDER_STATUSES.join(', ')}`;
+
 const TRANSITIONS: Readonly<Record<OrderStatusValue, readonly OrderStatusValue[]>> = {
   PENDING: ['IN_TRANSIT', 'CANCELED'],
   IN_TRANSIT: ['DELIVERED', 'CANCELED'],
