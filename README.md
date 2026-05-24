@@ -17,11 +17,19 @@ documentada com Swagger.
 
 ---
 
-## Live
+## Live — pronto para uso
+
+A API está hospedada e funcionando. Não precisa rodar nada localmente: dá
+para autenticar, criar pedidos, listar, filtrar, editar e deletar tudo
+direto pelo navegador via Swagger.
+
+👉 **https://naporta-orders-api.onrender.com/docs** — abra o Swagger, clique
+em **Authorize**, use as credenciais do admin abaixo e teste todos os
+endpoints.
 
 | Recurso       | URL                                                  |
 | ------------- | ---------------------------------------------------- |
-| **API**       | https://naporta-orders-api.onrender.com              |
+| **API base**  | https://naporta-orders-api.onrender.com              |
 | **Swagger**   | https://naporta-orders-api.onrender.com/docs         |
 | **Liveness**  | https://naporta-orders-api.onrender.com/health       |
 | **Readiness** | https://naporta-orders-api.onrender.com/health/ready |
