@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: naporta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: naporta
+      POSTGRES_PASSWORD: naporta
+      POSTGRES_DB: naporta
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U naporta -d naporta']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: naporta-adminer
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    depends_on:
+      - postgres
+
+  api:
+    build: .
+    container_name: naporta-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://naporta:naporta@postgres:5432/naporta?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-with-at-least-32-characters-please}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-with-at-least-32-characters-please-too}
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 7d
+      CORS_ORIGINS: '*'
+      RATE_LIMIT_TTL: 60
+      RATE_LIMIT_MAX: 100
+    ports:
+      - '3000:3000'
+    command: >
+      sh -c "npx prisma migrate deploy && node dist/main.js"
+
+volumes:
+  postgres-data:
