@@ -1,0 +1,48 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# build
+dist/
+build/
+
+# coverage
+coverage/
+.nyc_output/
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# os
+.DS_Store
+Thumbs.db
+
+# typescript
+*.tsbuildinfo
+
+# prisma
+prisma/*.db
+prisma/*.db-journal
+
+# testing
+.jest-cache/
+
+# husky internal
+.husky/_/
