@@ -19,7 +19,7 @@ async function buildPendingOrder(create: CreateOrderUseCase): Promise<{ id: stri
     customerDocument: '52998224725',
     deliveryAddress: ADDRESS,
     deliveryForecastAt: new Date(Date.now() + 7 * 86_400_000),
-    items: [{ description: 'X', priceCents: 1000 }],
+    items: [{ description: 'X', priceCents: 1000, quantity: 1 }],
     actorId: null,
   });
   return { id: order.id };
@@ -55,8 +55,8 @@ describe('UpdateOrderUseCase', () => {
     const result = await update.execute({
       orderId: id,
       items: [
-        { description: 'A', priceCents: 1000 },
-        { description: 'B', priceCents: 2000 },
+        { description: 'A', priceCents: 1000, quantity: 1 },
+        { description: 'B', priceCents: 2000, quantity: 1 },
       ],
       actorId: 'u-1',
     });

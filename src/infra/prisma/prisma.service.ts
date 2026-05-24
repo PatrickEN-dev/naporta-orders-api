@@ -47,7 +47,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     await this.base.$connect();
-    await this.ensureSequences();
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -60,9 +59,5 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       setTimeout(() => reject(new Error('database ping timed out')), this.pingTimeoutMs),
     );
     await Promise.race([result, timeout]);
-  }
-
-  private async ensureSequences(): Promise<void> {
-    await this.base.$executeRawUnsafe('CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1');
   }
 }

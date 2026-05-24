@@ -94,6 +94,7 @@ export class OrdersController {
       deliveryAddress: dto.deliveryAddress,
       deliveryForecastAt: dto.deliveryForecastAt,
       status: dto.status,
+      statusNote: dto.statusNote,
       items: dto.items,
       actorId: user.sub,
     });

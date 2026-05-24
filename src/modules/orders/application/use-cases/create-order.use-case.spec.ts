@@ -28,7 +28,7 @@ describe('CreateOrderUseCase', () => {
       customerDocument: VALID_CPF,
       deliveryAddress: ADDRESS,
       deliveryForecastAt: new Date(Date.now() + 7 * 86_400_000),
-      items: [{ description: 'Camiseta', priceCents: 4990 }],
+      items: [{ description: 'Camiseta', priceCents: 4990, quantity: 1 }],
       actorId: 'user-1',
     });
 
@@ -44,7 +44,7 @@ describe('CreateOrderUseCase', () => {
         customerDocument: VALID_CPF,
         deliveryAddress: ADDRESS,
         deliveryForecastAt: new Date(Date.now() - 1000),
-        items: [{ description: 'X', priceCents: 1000 }],
+        items: [{ description: 'X', priceCents: 1000, quantity: 1 }],
         actorId: null,
       }),
     ).rejects.toThrow('deliveryForecastAt must be in the future');

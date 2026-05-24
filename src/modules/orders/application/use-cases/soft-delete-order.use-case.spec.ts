@@ -30,7 +30,7 @@ describe('SoftDeleteOrderUseCase', () => {
       customerDocument: '52998224725',
       deliveryAddress: ADDRESS,
       deliveryForecastAt: new Date(Date.now() + 7 * 86_400_000),
-      items: [{ description: 'X', priceCents: 1000 }],
+      items: [{ description: 'X', priceCents: 1000, quantity: 1 }],
       actorId: null,
     });
 

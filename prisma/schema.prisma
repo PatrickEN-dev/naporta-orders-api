@@ -24,7 +24,6 @@ model User {
   deletedAt        DateTime?
 
   statusChanges OrderStatusHistory[]
-  deletedOrders Order[]              @relation("OrderDeletedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -48,6 +47,7 @@ model Order {
 
   deliveryForecastAt DateTime
   status             OrderStatus @default(PENDING)
+  totalCents         Int         @default(0)
 
   items         OrderItem[]
   statusHistory OrderStatusHistory[]
@@ -70,6 +70,7 @@ model OrderItem {
   order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   description String
   priceCents  Int
+  quantity    Int    @default(1)
 
   @@index([orderId])
   @@map("order_items")
@@ -81,6 +82,7 @@ model OrderStatusHistory {
   order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   fromStatus  OrderStatus?
   toStatus    OrderStatus
+  notes       String?
   changedById String?      @db.Uuid
   changedBy   User?        @relation(fields: [changedById], references: [id])
   changedAt   DateTime     @default(now())

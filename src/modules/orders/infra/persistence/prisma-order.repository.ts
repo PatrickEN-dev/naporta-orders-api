@@ -73,6 +73,7 @@ export class PrismaOrderRepository implements OrderRepository {
       deliveryCountry: address.country,
       deliveryForecastAt: order.deliveryForecastAt,
       status: order.status,
+      totalCents: order.total.cents,
       deletedAt: order.deletedAt,
     } satisfies Prisma.OrderUpdateInput;
 
@@ -80,6 +81,7 @@ export class PrismaOrderRepository implements OrderRepository {
       id: item.id,
       description: item.description,
       priceCents: item.price.cents,
+      quantity: item.quantity,
     }));
 
     await tx.order.upsert({
@@ -107,6 +109,7 @@ export class PrismaOrderRepository implements OrderRepository {
           orderId: event.orderId,
           fromStatus: null,
           toStatus: event.status,
+          notes: null,
           changedById: event.actorId,
           changedAt: event.occurredAt,
         },
@@ -119,6 +122,7 @@ export class PrismaOrderRepository implements OrderRepository {
           orderId: event.orderId,
           fromStatus: event.from,
           toStatus: event.to,
+          notes: event.notes,
           changedById: event.actorId,
           changedAt: event.occurredAt,
         },

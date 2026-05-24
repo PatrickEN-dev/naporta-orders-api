@@ -73,6 +73,12 @@ async function seedOrders(): Promise<void> {
     const createdAt = faker.date.recent({ days: 90 });
     const deliveryForecastAt = faker.date.soon({ days: 30, refDate: createdAt });
     const itemsCount = faker.number.int({ min: 1, max: 5 });
+    const items = Array.from({ length: itemsCount }).map(() => ({
+      description: faker.commerce.productName(),
+      priceCents: faker.number.int({ min: 1000, max: 50000 }),
+      quantity: faker.number.int({ min: 1, max: 4 }),
+    }));
+    const totalCents = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
 
     await prisma.order.create({
       data: {
@@ -91,13 +97,9 @@ async function seedOrders(): Promise<void> {
         deliveryCountry: 'BR',
         deliveryForecastAt,
         status,
+        totalCents,
         createdAt,
-        items: {
-          create: Array.from({ length: itemsCount }).map(() => ({
-            description: faker.commerce.productName(),
-            priceCents: faker.number.int({ min: 1000, max: 50000 }),
-          })),
-        },
+        items: { create: items },
         statusHistory: {
           create: { fromStatus: null, toStatus: status, changedAt: createdAt },
         },

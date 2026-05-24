@@ -1,6 +1,7 @@
 export interface CreateOrderItemInput {
   description: string;
   priceCents: number;
+  quantity: number;
 }
 
 export interface CreateOrderAddressInput {

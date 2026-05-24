@@ -1,0 +1,356 @@
+{
+  "info": {
+    "_postman_id": "naporta-orders-api-collection",
+    "name": "naPorta Orders API",
+    "description": "Coleção completa para testar a naPorta Orders API. Importa em Postman ou Insomnia.\n\n**Fluxo recomendado:**\n1. `Auth → Sign in` — captura `accessToken` e `refreshToken` automaticamente em variáveis da collection\n2. `Orders → Create order` — captura o `orderId` retornado\n3. Demais rotas usam essas variáveis\n\n**Variáveis:** baseUrl, accessToken, refreshToken, orderId",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "orderId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign in",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/sign-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "sign-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@naporta.test\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "description": "Login com email/senha. Retorna access + refresh tokens. Salva ambos automaticamente em variáveis da collection."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "  pm.test('returns access + refresh tokens', () => {",
+                  "    pm.expect(json.accessToken).to.be.a('string');",
+                  "    pm.expect(json.refreshToken).to.be.a('string');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh tokens",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "refresh"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "description": "Rotaciona o par access + refresh. Substitui ambas variáveis após sucesso."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sign out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/sign-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "sign-out"]
+            },
+            "description": "Revoga o refresh token do usuário atual. Retorna 204 No Content."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Mariana Silva\",\n  \"customerDocument\": \"529.982.247-25\",\n  \"deliveryAddress\": {\n    \"zipCode\": \"01310100\",\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1578\",\n    \"complement\": \"Apto 101\",\n    \"district\": \"Bela Vista\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"country\": \"BR\"\n  },\n  \"deliveryForecastAt\": \"2027-12-31T18:00:00.000Z\",\n  \"items\": [\n    { \"description\": \"Camiseta básica preta P\", \"priceCents\": 4990 },\n    { \"description\": \"Bermuda jeans M\", \"priceCents\": 8990 }\n  ]\n}"
+            },
+            "description": "Cria um pedido. Retorna 201 com o pedido completo. Salva o `id` automaticamente em variável da collection."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('orderId', json.id);",
+                  "  pm.test('order has generated number', () => {",
+                  "    pm.expect(json.number).to.match(/^ORD-\\d{4}-\\d{6}$/);",
+                  "  });",
+                  "  pm.test('status starts as PENDING', () => {",
+                  "    pm.expect(json.status).to.eql('PENDING');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List orders — defaults",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders?page=1&limit=20&sort=-createdAt",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "sort", "value": "-createdAt" }
+              ]
+            },
+            "description": "Lista pedidos paginados (default: page=1, limit=20, sort por createdAt desc)."
+          }
+        },
+        {
+          "name": "List orders — filter by status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders?status=PENDING",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders"],
+              "query": [{ "key": "status", "value": "PENDING" }]
+            },
+            "description": "Filtra pedidos com status PENDING. Aceita PENDING | IN_TRANSIT | DELIVERED | CANCELED."
+          }
+        },
+        {
+          "name": "List orders — filter by number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders?number=ORD-2026-000001",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders"],
+              "query": [{ "key": "number", "value": "ORD-2026-000001" }]
+            },
+            "description": "Filtra por número exato do pedido."
+          }
+        },
+        {
+          "name": "List orders — filter by period",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders?startDate=2026-01-01T00:00:00.000Z&endDate=2026-12-31T23:59:59.999Z",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders"],
+              "query": [
+                { "key": "startDate", "value": "2026-01-01T00:00:00.000Z" },
+                { "key": "endDate", "value": "2026-12-31T23:59:59.999Z" }
+              ]
+            },
+            "description": "Filtra por intervalo de data de criação (createdAt). Ambos opcionais e combináveis."
+          }
+        },
+        {
+          "name": "List orders — combined filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders?status=IN_TRANSIT&startDate=2026-01-01T00:00:00.000Z&page=1&limit=10&sort=deliveryForecastAt",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders"],
+              "query": [
+                { "key": "status", "value": "IN_TRANSIT" },
+                { "key": "startDate", "value": "2026-01-01T00:00:00.000Z" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sort", "value": "deliveryForecastAt" }
+              ]
+            },
+            "description": "Combina status + período + paginação + ordenação ascendente por data de entrega prevista."
+          }
+        },
+        {
+          "name": "Find order by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders", "{{orderId}}"]
+            },
+            "description": "Detalhe do pedido pelo id (UUID). Usa `orderId` salvo após `Create order`."
+          }
+        },
+        {
+          "name": "Update order — change status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders", "{{orderId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_TRANSIT\"\n}"
+            },
+            "description": "Transiciona o status. Transições válidas: PENDING → IN_TRANSIT, PENDING → CANCELED, IN_TRANSIT → DELIVERED, IN_TRANSIT → CANCELED."
+          }
+        },
+        {
+          "name": "Update order — reschedule delivery",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders", "{{orderId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryForecastAt\": \"2028-01-15T18:00:00.000Z\"\n}"
+            },
+            "description": "Altera a data prevista de entrega. Deve ser futura."
+          }
+        },
+        {
+          "name": "Update order — replace items",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders", "{{orderId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"description\": \"Camiseta atualizada\", \"priceCents\": 5990 },\n    { \"description\": \"Calça\", \"priceCents\": 15990 },\n    { \"description\": \"Meia\", \"priceCents\": 1990 }\n  ]\n}"
+            },
+            "description": "Substitui a lista de items inteiramente."
+          }
+        },
+        {
+          "name": "Update order — change delivery address",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders", "{{orderId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryAddress\": {\n    \"zipCode\": \"22071900\",\n    \"street\": \"Av. Atlântica\",\n    \"number\": \"1702\",\n    \"district\": \"Copacabana\",\n    \"city\": \"Rio de Janeiro\",\n    \"state\": \"RJ\"\n  }\n}"
+            },
+            "description": "Substitui o endereço de entrega completo. country default é BR."
+          }
+        },
+        {
+          "name": "Soft delete order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "orders", "{{orderId}}"]
+            },
+            "description": "Exclusão lógica. Retorna 204 No Content. Após isso, o pedido não aparece em list/find."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Liveness",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] },
+            "description": "Liveness probe. Retorna ok se a app está respondendo."
+          }
+        },
+        {
+          "name": "Readiness",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/ready",
+              "host": ["{{baseUrl}}"],
+              "path": ["health", "ready"]
+            },
+            "description": "Readiness probe. Retorna ok se memória e Postgres estão saudáveis."
+          }
+        }
+      ]
+    }
+  ]
+}

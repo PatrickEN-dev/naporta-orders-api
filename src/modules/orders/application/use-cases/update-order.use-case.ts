@@ -31,12 +31,13 @@ export class UpdateOrderUseCase {
           id: this.uuid.generate(),
           description: item.description,
           price: Money.fromCents(item.priceCents),
+          quantity: item.quantity,
         }),
       );
       order.replaceItems(items);
     }
     if (input.status) {
-      order.changeStatus(input.status, input.actorId);
+      order.changeStatus(input.status, input.actorId, input.statusNote);
     }
 
     await this.orders.save(order);

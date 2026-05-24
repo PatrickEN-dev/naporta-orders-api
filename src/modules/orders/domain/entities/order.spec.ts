@@ -26,8 +26,18 @@ function buildOrder(overrides: Partial<{ forecast: Date }> = {}): Order {
     deliveryAddress: buildAddress(),
     deliveryForecastAt: overrides.forecast ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
     items: [
-      OrderItem.create({ id: 'item-1', description: 'Camiseta', price: Money.fromCents(4990) }),
-      OrderItem.create({ id: 'item-2', description: 'Bermuda', price: Money.fromCents(8990) }),
+      OrderItem.create({
+        id: 'item-1',
+        description: 'Camiseta',
+        price: Money.fromCents(4990),
+        quantity: 1,
+      }),
+      OrderItem.create({
+        id: 'item-2',
+        description: 'Bermuda',
+        price: Money.fromCents(8990),
+        quantity: 1,
+      }),
     ],
     actorId: 'user-1',
   });

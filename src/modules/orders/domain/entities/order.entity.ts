@@ -18,6 +18,7 @@ interface OrderProps {
   deliveryForecastAt: Date;
   status: OrderStatus;
   items: OrderItem[];
+  totalCents: number;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -41,6 +42,7 @@ export class Order extends AggregateRoot {
   private _deliveryForecastAt: Date;
   private _status: OrderStatus;
   private _items: OrderItem[];
+  private _totalCents: number;
   private _updatedAt: Date;
   private _deletedAt: Date | null;
 
@@ -56,6 +58,7 @@ export class Order extends AggregateRoot {
     this._deliveryForecastAt = props.deliveryForecastAt;
     this._status = props.status;
     this._items = [...props.items];
+    this._totalCents = props.totalCents;
     this.createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
     this._deletedAt = props.deletedAt;
@@ -76,10 +79,12 @@ export class Order extends AggregateRoot {
       deliveryForecastAt: props.deliveryForecastAt,
       status: OrderStatus.pending(),
       items: props.items,
+      totalCents: 0,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
     });
+    order.recalculateTotal();
     order.addEvent(new OrderCreatedEvent(order.id, order.status, props.actorId));
     return order;
   }
@@ -117,15 +122,17 @@ export class Order extends AggregateRoot {
   }
 
   get total(): Money {
-    return this._items.reduce<Money>((acc, item) => acc.add(item.price), Money.zero());
+    return Money.fromCents(this._totalCents);
   }
 
-  changeStatus(next: OrderStatusValue, actorId: string | null): void {
+  changeStatus(next: OrderStatusValue, actorId: string | null, notes?: string | null): void {
     if (this._status.value === next) return;
     const previous = this._status;
     this._status = previous.transitionTo(next);
     this.touch();
-    this.addEvent(new OrderStatusChangedEvent(this.id, previous.value, next, actorId));
+    this.addEvent(
+      new OrderStatusChangedEvent(this.id, previous.value, next, actorId, notes ?? null),
+    );
   }
 
   rescheduleDelivery(forecastAt: Date): void {
@@ -142,6 +149,7 @@ export class Order extends AggregateRoot {
   replaceItems(items: OrderItem[]): void {
     Order.assertItems(items);
     this._items = [...items];
+    this.recalculateTotal();
     this.touch();
   }
 
@@ -149,6 +157,10 @@ export class Order extends AggregateRoot {
     if (this._deletedAt) return;
     this._deletedAt = new Date();
     this.touch();
+  }
+
+  private recalculateTotal(): void {
+    this._totalCents = this._items.reduce((sum, item) => sum + item.subtotal.cents, 0);
   }
 
   private touch(): void {

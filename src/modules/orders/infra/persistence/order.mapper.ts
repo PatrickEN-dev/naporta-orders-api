@@ -16,6 +16,7 @@ export class OrderMapper {
         id: item.id,
         description: item.description,
         price: Money.fromCents(item.priceCents),
+        quantity: item.quantity,
       }),
     );
 
@@ -37,6 +38,7 @@ export class OrderMapper {
       deliveryForecastAt: raw.deliveryForecastAt,
       status: OrderStatus.create(raw.status),
       items,
+      totalCents: raw.totalCents,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
       deletedAt: raw.deletedAt,

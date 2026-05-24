@@ -1,6 +1,15 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsDate, IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 import {
   ORDER_STATUSES,
   type OrderStatusValue,
@@ -25,6 +34,15 @@ export class UpdateOrderRequestDto {
   @IsOptional()
   @IsEnum(ORDER_STATUSES)
   status?: OrderStatusValue;
+
+  @ApiPropertyOptional({
+    example: 'Cliente solicitou cancelamento',
+    description: 'Nota opcional registrada em OrderStatusHistory quando o status muda',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  statusNote?: string;
 
   @ApiPropertyOptional({ type: [OrderItemDto] })
   @IsOptional()

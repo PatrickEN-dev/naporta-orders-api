@@ -6,6 +6,7 @@ export interface UpdateOrderInput {
   deliveryAddress?: CreateOrderAddressInput;
   deliveryForecastAt?: Date;
   status?: OrderStatusValue;
+  statusNote?: string;
   items?: CreateOrderItemInput[];
   actorId: string | null;
 }

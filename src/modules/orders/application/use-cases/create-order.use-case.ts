@@ -25,6 +25,7 @@ export class CreateOrderUseCase {
         id: this.uuid.generate(),
         description: item.description,
         price: Money.fromCents(item.priceCents),
+        quantity: item.quantity,
       }),
     );
 

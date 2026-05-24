@@ -6,6 +6,8 @@ export class OrderItemResponse {
   @ApiProperty() id!: string;
   @ApiProperty() description!: string;
   @ApiProperty() priceCents!: number;
+  @ApiProperty() quantity!: number;
+  @ApiProperty() subtotalCents!: number;
 }
 
 export class OrderAddressResponse {
@@ -69,6 +71,8 @@ export class OrderPresenter {
         id: item.id,
         description: item.description,
         priceCents: item.price.cents,
+        quantity: item.quantity,
+        subtotalCents: item.subtotal.cents,
       })),
       totalCents: order.total.cents,
       createdAt: order.createdAt.toISOString(),

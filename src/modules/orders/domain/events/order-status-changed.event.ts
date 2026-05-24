@@ -10,5 +10,6 @@ export class OrderStatusChangedEvent implements DomainEvent {
     readonly from: OrderStatusValue,
     readonly to: OrderStatusValue,
     readonly actorId: string | null,
+    readonly notes: string | null = null,
   ) {}
 }
