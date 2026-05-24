@@ -5,6 +5,7 @@ import {
   HealthCheck,
   HealthCheckService,
   type HealthCheckResult,
+  type HealthIndicatorResult,
   MemoryHealthIndicator,
 } from '@nestjs/terminus';
 import { Public } from '../../common/decorators/public.decorator';
@@ -31,15 +32,16 @@ export class HealthController {
   @Get()
   @HealthCheck()
   liveness(): Promise<HealthCheckResult> {
-    return this.health.check([() => this.memory.checkHeap('memory_heap', this.heapLimitBytes)]);
+    return this.health.check([() => this.checkMemory()]);
   }
 
   @Get('ready')
   @HealthCheck()
   readiness(): Promise<HealthCheckResult> {
-    return this.health.check([
-      () => this.memory.checkHeap('memory_heap', this.heapLimitBytes),
-      () => this.prisma.isHealthy(),
-    ]);
+    return this.health.check([() => this.checkMemory(), () => this.prisma.isHealthy()]);
+  }
+
+  private checkMemory(): Promise<HealthIndicatorResult> {
+    return this.memory.checkHeap('memory_heap', this.heapLimitBytes);
   }
 }

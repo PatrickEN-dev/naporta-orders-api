@@ -1,8 +1,8 @@
-import { NotFoundError } from '../../../../shared/errors/domain.error';
-import { UuidService } from '../../../../shared/services/uuid.service';
-import { InMemoryOrderRepository } from '../../__tests__/in-memory-order.repository';
-import { CreateOrderUseCase } from './create-order.use-case';
-import { SoftDeleteOrderUseCase } from './soft-delete-order.use-case';
+import { NotFoundError } from '../../../../../shared/errors/domain.error';
+import { UuidService } from '../../../../../shared/services/uuid.service';
+import { InMemoryOrderRepository } from '../../../__tests__/in-memory-order.repository';
+import { CreateOrderUseCase } from '../create-order.use-case';
+import { SoftDeleteOrderUseCase } from '../soft-delete-order.use-case';
 
 const ADDRESS = {
   zipCode: '01310100',

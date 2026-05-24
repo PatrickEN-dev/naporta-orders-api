@@ -1,8 +1,8 @@
-import { InvalidStateError, NotFoundError } from '../../../../shared/errors/domain.error';
-import { UuidService } from '../../../../shared/services/uuid.service';
-import { InMemoryOrderRepository } from '../../__tests__/in-memory-order.repository';
-import { CreateOrderUseCase } from './create-order.use-case';
-import { UpdateOrderUseCase } from './update-order.use-case';
+import { InvalidStateError, NotFoundError } from '../../../../../shared/errors/domain.error';
+import { UuidService } from '../../../../../shared/services/uuid.service';
+import { InMemoryOrderRepository } from '../../../__tests__/in-memory-order.repository';
+import { CreateOrderUseCase } from '../create-order.use-case';
+import { UpdateOrderUseCase } from '../update-order.use-case';
 
 const ADDRESS = {
   zipCode: '01310100',

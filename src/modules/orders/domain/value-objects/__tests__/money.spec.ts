@@ -1,5 +1,5 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
-import { Money } from './money.vo';
+import { ValidationError } from '../../../../../shared/errors/domain.error';
+import { Money } from '../money.vo';
 
 describe('Money', () => {
   it('creates from cents', () => {

@@ -1,4 +1,4 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
+import { assert } from '../../../../shared/domain/assert';
 import { ValueObject } from '../../../../shared/domain/value-object.base';
 
 const CPF_LENGTH = 11;
@@ -12,14 +12,14 @@ export class Document extends ValueObject<{ digits: string }> {
   static create(raw: string): Document {
     const digits = raw.replace(/\D/g, '');
     if (digits.length === CPF_LENGTH) {
-      if (!isValidCpf(digits)) throw new ValidationError('Invalid CPF');
+      assert(isValidCpf(digits), 'Invalid CPF');
       return new Document(digits);
     }
     if (digits.length === CNPJ_LENGTH) {
-      if (!isValidCnpj(digits)) throw new ValidationError('Invalid CNPJ');
+      assert(isValidCnpj(digits), 'Invalid CNPJ');
       return new Document(digits);
     }
-    throw new ValidationError('Document must be a valid CPF (11 digits) or CNPJ (14 digits)');
+    assert(false, 'Document must be a valid CPF (11 digits) or CNPJ (14 digits)');
   }
 
   get value(): string {

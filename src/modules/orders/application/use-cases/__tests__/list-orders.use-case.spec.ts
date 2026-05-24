@@ -1,8 +1,8 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
-import { UuidService } from '../../../../shared/services/uuid.service';
-import { InMemoryOrderRepository } from '../../__tests__/in-memory-order.repository';
-import { CreateOrderUseCase } from './create-order.use-case';
-import { ListOrdersUseCase } from './list-orders.use-case';
+import { ValidationError } from '../../../../../shared/errors/domain.error';
+import { UuidService } from '../../../../../shared/services/uuid.service';
+import { InMemoryOrderRepository } from '../../../__tests__/in-memory-order.repository';
+import { CreateOrderUseCase } from '../create-order.use-case';
+import { ListOrdersUseCase } from '../list-orders.use-case';
 
 const ADDRESS = {
   zipCode: '01310100',

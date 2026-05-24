@@ -1,9 +1,9 @@
-import { UnauthorizedError } from '../../../../shared/errors/domain.error';
-import { User } from '../../../users/domain/entities/user.entity';
-import { InMemoryUserRepository } from '../../../users/__tests__/in-memory-user.repository';
-import { HashService } from '../services/hash.service';
-import type { TokenService } from '../services/token.service';
-import { RefreshTokenUseCase } from './refresh-token.use-case';
+import { UnauthorizedError } from '../../../../../shared/errors/domain.error';
+import { User } from '../../../../users/domain/entities/user.entity';
+import { InMemoryUserRepository } from '../../../../users/__tests__/in-memory-user.repository';
+import { HashService } from '../../services/hash.service';
+import type { TokenService } from '../../services/token.service';
+import { RefreshTokenUseCase } from '../refresh-token.use-case';
 
 describe('RefreshTokenUseCase', () => {
   let users: InMemoryUserRepository;

@@ -1,5 +1,5 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
-import { OrderNumber } from './order-number.vo';
+import { ValidationError } from '../../../../../shared/errors/domain.error';
+import { OrderNumber } from '../order-number.vo';
 
 describe('OrderNumber', () => {
   it('formats year and sequence with padding', () => {

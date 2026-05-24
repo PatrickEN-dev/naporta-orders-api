@@ -1,4 +1,4 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
+import { assert } from '../../../../shared/domain/assert';
 import { ValueObject } from '../../../../shared/domain/value-object.base';
 
 interface AddressProps {
@@ -30,12 +30,8 @@ export class Address extends ValueObject<AddressProps> {
 
   static create(input: AddressInput): Address {
     const zipCode = input.zipCode.replace(/\D/g, '');
-    if (zipCode.length !== 8) {
-      throw new ValidationError('zipCode must contain 8 digits');
-    }
-    if (input.state.length !== 2) {
-      throw new ValidationError('state must be a 2-letter UF code');
-    }
+    assert(zipCode.length === 8, 'zipCode must contain 8 digits');
+    assert(input.state.length === 2, 'state must be a 2-letter UF code');
     return new Address({
       zipCode,
       street: input.street.trim(),

@@ -1,6 +1,6 @@
-import { UuidService } from '../../../../shared/services/uuid.service';
-import { InMemoryOrderRepository } from '../../__tests__/in-memory-order.repository';
-import { CreateOrderUseCase } from './create-order.use-case';
+import { UuidService } from '../../../../../shared/services/uuid.service';
+import { InMemoryOrderRepository } from '../../../__tests__/in-memory-order.repository';
+import { CreateOrderUseCase } from '../create-order.use-case';
 
 const VALID_CPF = '52998224725';
 

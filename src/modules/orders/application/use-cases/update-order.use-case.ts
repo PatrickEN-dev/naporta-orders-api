@@ -2,11 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NotFoundError } from '../../../../shared/errors/domain.error';
 import { UuidService } from '../../../../shared/services/uuid.service';
 import type { Order } from '../../domain/entities/order.entity';
-import { OrderItem } from '../../domain/entities/order-item.entity';
 import { ORDER_REPOSITORY, type OrderRepository } from '../../domain/repositories/order.repository';
 import { Address } from '../../domain/value-objects/address.vo';
-import { Money } from '../../domain/value-objects/money.vo';
 import type { UpdateOrderInput } from '../dtos/update-order.input';
+import { buildOrderItems } from '../helpers/build-order-items';
 
 @Injectable()
 export class UpdateOrderUseCase {
@@ -26,15 +25,7 @@ export class UpdateOrderUseCase {
       order.rescheduleDelivery(input.deliveryForecastAt);
     }
     if (input.items) {
-      const items = input.items.map((item) =>
-        OrderItem.create({
-          id: this.uuid.generate(),
-          description: item.description,
-          price: Money.fromCents(item.priceCents),
-          quantity: item.quantity,
-        }),
-      );
-      order.replaceItems(items);
+      order.replaceItems(buildOrderItems(this.uuid, input.items));
     }
     if (input.status) {
       order.changeStatus(input.status, input.actorId, input.statusNote);

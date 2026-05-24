@@ -1,5 +1,5 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
-import { Document } from './document.vo';
+import { ValidationError } from '../../../../../shared/errors/domain.error';
+import { Document } from '../document.vo';
 
 describe('Document', () => {
   it('accepts a valid CPF (digits only)', () => {

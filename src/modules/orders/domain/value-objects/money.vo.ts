@@ -1,4 +1,4 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
+import { assertNonNegativeInteger } from '../../../../shared/domain/assert';
 import { ValueObject } from '../../../../shared/domain/value-object.base';
 
 export class Money extends ValueObject<{ cents: number }> {
@@ -7,12 +7,7 @@ export class Money extends ValueObject<{ cents: number }> {
   }
 
   static fromCents(cents: number): Money {
-    if (!Number.isInteger(cents)) {
-      throw new ValidationError('Money must be an integer number of cents');
-    }
-    if (cents < 0) {
-      throw new ValidationError('Money cannot be negative');
-    }
+    assertNonNegativeInteger(cents, 'Money must be a non-negative integer number of cents');
     return new Money(cents);
   }
 

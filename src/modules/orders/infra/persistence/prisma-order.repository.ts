@@ -9,9 +9,11 @@ import type {
   OrderRepository,
   PaginatedOrders,
 } from '../../domain/repositories/order.repository';
+import type { DomainEvent } from '../../../../shared/domain/domain-event';
 import { OrderMapper } from './order.mapper';
 
 type Tx = Prisma.TransactionClient;
+type StatusHistoryData = Prisma.OrderStatusHistoryUncheckedCreateInput;
 
 @Injectable()
 export class PrismaOrderRepository implements OrderRepository {
@@ -45,7 +47,8 @@ export class PrismaOrderRepository implements OrderRepository {
     await this.prisma.base.$transaction(async (tx) => {
       await this.upsertOrder(tx, order);
       for (const event of events) {
-        await this.recordHistory(tx, event);
+        const record = toHistoryRecord(event);
+        if (record) await tx.orderStatusHistory.create({ data: record });
       }
     });
   }
@@ -99,37 +102,6 @@ export class PrismaOrderRepository implements OrderRepository {
     });
   }
 
-  private async recordHistory(
-    tx: Tx,
-    event: OrderCreatedEvent | OrderStatusChangedEvent | { name: string },
-  ): Promise<void> {
-    if (event instanceof OrderCreatedEvent) {
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId: event.orderId,
-          fromStatus: null,
-          toStatus: event.status,
-          notes: null,
-          changedById: event.actorId,
-          changedAt: event.occurredAt,
-        },
-      });
-      return;
-    }
-    if (event instanceof OrderStatusChangedEvent) {
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId: event.orderId,
-          fromStatus: event.from,
-          toStatus: event.to,
-          notes: event.notes,
-          changedById: event.actorId,
-          changedAt: event.occurredAt,
-        },
-      });
-    }
-  }
-
   private buildWhere(options: ListOrdersOptions): Prisma.OrderWhereInput {
     const { filters } = options;
     const where: Prisma.OrderWhereInput = {};
@@ -143,4 +115,28 @@ export class PrismaOrderRepository implements OrderRepository {
     }
     return where;
   }
+}
+
+function toHistoryRecord(event: DomainEvent): StatusHistoryData | null {
+  if (event instanceof OrderCreatedEvent) {
+    return {
+      orderId: event.orderId,
+      fromStatus: null,
+      toStatus: event.status,
+      notes: null,
+      changedById: event.actorId,
+      changedAt: event.occurredAt,
+    };
+  }
+  if (event instanceof OrderStatusChangedEvent) {
+    return {
+      orderId: event.orderId,
+      fromStatus: event.from,
+      toStatus: event.to,
+      notes: event.notes,
+      changedById: event.actorId,
+      changedAt: event.occurredAt,
+    };
+  }
+  return null;
 }

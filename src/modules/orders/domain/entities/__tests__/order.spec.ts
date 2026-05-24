@@ -1,10 +1,10 @@
-import { InvalidStateError, ValidationError } from '../../../../shared/errors/domain.error';
-import { Address } from '../value-objects/address.vo';
-import { Document } from '../value-objects/document.vo';
-import { Money } from '../value-objects/money.vo';
-import { OrderNumber } from '../value-objects/order-number.vo';
-import { OrderItem } from './order-item.entity';
-import { Order } from './order.entity';
+import { InvalidStateError, ValidationError } from '../../../../../shared/errors/domain.error';
+import { Address } from '../../value-objects/address.vo';
+import { Document } from '../../value-objects/document.vo';
+import { Money } from '../../value-objects/money.vo';
+import { OrderNumber } from '../../value-objects/order-number.vo';
+import { OrderItem } from '../order-item.entity';
+import { Order } from '../order.entity';
 
 function buildAddress(): Address {
   return Address.create({

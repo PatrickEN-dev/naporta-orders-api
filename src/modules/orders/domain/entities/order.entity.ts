@@ -1,5 +1,5 @@
 import { AggregateRoot } from '../../../../shared/domain/aggregate-root.base';
-import { ValidationError } from '../../../../shared/errors/domain.error';
+import { assert } from '../../../../shared/domain/assert';
 import { OrderCreatedEvent } from '../events/order-created.event';
 import { OrderStatusChangedEvent } from '../events/order-status-changed.event';
 import type { Address } from '../value-objects/address.vo';
@@ -43,14 +43,13 @@ export class Order extends AggregateRoot {
   private _status: OrderStatus;
   private _items: OrderItem[];
   private _totalCents: number;
-  private _updatedAt: Date;
   private _deletedAt: Date | null;
 
   readonly number: OrderNumber;
   readonly createdAt: Date;
 
   private constructor(props: OrderProps) {
-    super(props.id);
+    super(props.id, props.updatedAt);
     this.number = props.number;
     this._customerName = props.customerName;
     this._customerDocument = props.customerDocument;
@@ -60,14 +59,16 @@ export class Order extends AggregateRoot {
     this._items = [...props.items];
     this._totalCents = props.totalCents;
     this.createdAt = props.createdAt;
-    this._updatedAt = props.updatedAt;
     this._deletedAt = props.deletedAt;
   }
 
   static create(props: CreateOrderProps): Order {
-    Order.assertCustomerName(props.customerName);
-    Order.assertItems(props.items);
-    Order.assertForecastInFuture(props.deliveryForecastAt);
+    assert(props.customerName.trim().length > 0, 'customerName cannot be empty');
+    assert(props.items.length > 0, 'Order must contain at least one item');
+    assert(
+      props.deliveryForecastAt.getTime() > Date.now(),
+      'deliveryForecastAt must be in the future',
+    );
 
     const now = new Date();
     const order = new Order({
@@ -111,9 +112,6 @@ export class Order extends AggregateRoot {
   get items(): readonly OrderItem[] {
     return this._items;
   }
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
   get deletedAt(): Date | null {
     return this._deletedAt;
   }
@@ -136,7 +134,7 @@ export class Order extends AggregateRoot {
   }
 
   rescheduleDelivery(forecastAt: Date): void {
-    Order.assertForecastInFuture(forecastAt);
+    assert(forecastAt.getTime() > Date.now(), 'deliveryForecastAt must be in the future');
     this._deliveryForecastAt = forecastAt;
     this.touch();
   }
@@ -147,7 +145,7 @@ export class Order extends AggregateRoot {
   }
 
   replaceItems(items: OrderItem[]): void {
-    Order.assertItems(items);
+    assert(items.length > 0, 'Order must contain at least one item');
     this._items = [...items];
     this.recalculateTotal();
     this.touch();
@@ -161,27 +159,5 @@ export class Order extends AggregateRoot {
 
   private recalculateTotal(): void {
     this._totalCents = this._items.reduce((sum, item) => sum + item.subtotal.cents, 0);
-  }
-
-  private touch(): void {
-    this._updatedAt = new Date();
-  }
-
-  private static assertCustomerName(name: string): void {
-    if (name.trim().length === 0) {
-      throw new ValidationError('customerName cannot be empty');
-    }
-  }
-
-  private static assertItems(items: OrderItem[]): void {
-    if (items.length === 0) {
-      throw new ValidationError('Order must contain at least one item');
-    }
-  }
-
-  private static assertForecastInFuture(forecastAt: Date): void {
-    if (forecastAt.getTime() <= Date.now()) {
-      throw new ValidationError('deliveryForecastAt must be in the future');
-    }
   }
 }

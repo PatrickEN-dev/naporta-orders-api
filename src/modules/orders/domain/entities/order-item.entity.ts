@@ -1,4 +1,4 @@
-import { ValidationError } from '../../../../shared/errors/domain.error';
+import { assert, assertPositiveInteger } from '../../../../shared/domain/assert';
 import { Entity } from '../../../../shared/domain/entity.base';
 import { Money } from '../value-objects/money.vo';
 
@@ -23,12 +23,8 @@ export class OrderItem extends Entity {
 
   static create(props: OrderItemProps): OrderItem {
     const description = props.description.trim();
-    if (description.length === 0) {
-      throw new ValidationError('OrderItem description cannot be empty');
-    }
-    if (!Number.isInteger(props.quantity) || props.quantity < 1) {
-      throw new ValidationError('OrderItem quantity must be a positive integer');
-    }
+    assert(description.length > 0, 'OrderItem description cannot be empty');
+    assertPositiveInteger(props.quantity, 'OrderItem quantity must be a positive integer');
     return new OrderItem({ ...props, description });
   }
 

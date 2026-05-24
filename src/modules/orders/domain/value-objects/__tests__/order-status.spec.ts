@@ -1,5 +1,5 @@
-import { InvalidStateError } from '../../../../shared/errors/domain.error';
-import { OrderStatus } from './order-status.vo';
+import { InvalidStateError } from '../../../../../shared/errors/domain.error';
+import { OrderStatus } from '../order-status.vo';
 
 describe('OrderStatus', () => {
   it('starts as PENDING', () => {
