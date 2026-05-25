@@ -57,12 +57,13 @@ Docker multistage · GitHub Actions
 
 ## Documentação
 
-| Documento                                                                                                | Para que serve                                                              |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [**docs/overview.md**](./docs/overview.md)                                                               | Como o projeto funciona — camadas, fluxo de uma request, auth, persistência |
-| [**docs/architecture.md**](./docs/architecture.md)                                                       | Por que foi construído desta forma — decisões de stack, DDD, trade-offs     |
-| [**docs/structure.md**](./docs/structure.md)                                                             | Mapa completo do código — o que cada pasta e cada sufixo de arquivo faz     |
-| [**docs/naporta-orders-api.postman_collection.json**](./docs/naporta-orders-api.postman_collection.json) | Coleção com 17 requests para Postman/Insomnia                               |
+| Documento                                                                                                | Para que serve                                                                               |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [**docs/overview.md**](./docs/overview.md)                                                               | Como o projeto funciona — camadas, fluxo de uma request, auth, persistência                  |
+| [**docs/architecture.md**](./docs/architecture.md)                                                       | Por que foi construído desta forma — decisões de stack, DDD, trade-offs                      |
+| [**docs/structure.md**](./docs/structure.md)                                                             | Mapa completo do código — o que cada pasta e cada sufixo de arquivo faz                      |
+| [**docs/faq.md**](./docs/faq.md)                                                                         | Tira-dúvidas técnico completo: env, auth, domínio, bibliotecas, deploy. Indexado por keyword |
+| [**docs/naporta-orders-api.postman_collection.json**](./docs/naporta-orders-api.postman_collection.json) | Coleção com 17 requests para Postman/Insomnia                                                |
 
 ---
 
@@ -304,142 +305,75 @@ Gerar secrets seguros: `openssl rand -base64 48` (rodar duas vezes).
 
 ## Tira-dúvidas
 
-### Por que preciso rodar `npm run db:seed`?
+Documento completo: [**docs/faq.md**](./docs/faq.md). Indexado por
+keyword — use **Ctrl+F** com qualquer termo abaixo para pular direto à
+resposta.
 
-O banco sobe vazio. O seed cria o usuário admin (`admin@naporta.test` /
-`Admin@123`, hash Argon2id) e popula 50 pedidos fictícios com endereços,
-itens e status variados para você ter dados realistas para testar
-listagem, filtros e paginação. Sem o seed, o login falha (admin não
-existe) e a listagem vem vazia.
+### Configuração e variáveis de ambiente
 
-### Por que a senha precisa ter 8 caracteres? E por que senha errada às vezes retorna 400 em vez de 401?
+`NODE_ENV` (`development` vs `production`) · `PORT` · `LOG_LEVEL`
+(`pino`, `debug`, `info`) · `DATABASE_URL` (`Postgres`, `Neon`,
+`pooler`) · `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` (`openssl
+rand`) · `JWT_ACCESS_TTL` / `JWT_REFRESH_TTL` (`15m`, `7d`) ·
+`CORS_ORIGINS` · `TRUST_PROXY` (`load balancer`, `X-Forwarded-For`) ·
+`RATE_LIMIT_TTL` + `RATE_LIMIT_MAX` (`Throttler`, `429`) ·
+`MEMORY_HEAP_LIMIT_MB` (`health check`) · `DB_PING_TIMEOUT_MS`
+(`readiness`).
 
-A regra no DTO de sign-in é `@MinLength(8)`. Se o cliente manda uma
-string com menos de 8 caracteres, o `ValidationPipe` global rejeita
-**antes** de chegar no service — daí o `400 Bad Request` com a mensagem
-"password deve ter no mínimo 8 caracteres". Senha igual ou maior que 8
-mas incorreta passa pelo validator, vai até o service, falha no
-`argon2.verify` e retorna `401 Unauthorized` com "credenciais
-inválidas".
+### Autenticação e segurança
 
-É defesa em camadas: filtrar inputs absurdos na borda evita gastar CPU
-em hash Argon2id para palpites de 1 caractere. Trade-off consciente: o
-custo é vazar o requisito mínimo de 8 chars (que de qualquer forma está
-documentado no Swagger).
+senha mínima 8 chars · `400 vs 401` · `Argon2id` (vs `bcrypt`) ·
+`jti` no JWT (`replay protection`) · `refresh token rotation` · hash
+`SHA-256` no banco · `sign-out`.
 
-### Por que CPF aceita com máscara (`529.982.247-25`) E sem máscara (`52998224725`)?
+### Domínio e regras de negócio
 
-O `Document` value object faz `replace(/\D/g, '')` antes de validar.
-Aceitar as duas formas é ergonomia para o cliente: front que envia o
-valor "como digitado" funciona, e front que envia "limpo" também. No
-banco fica sempre só dígitos (11 para CPF, 14 para CNPJ).
+`CPF` / `CNPJ` com `máscara` opcional · validação `mod-11` ·
+`priceCents` int em centavos (`IEEE 754`, vs `float`, vs `Decimal`)
+· `subtotalCents` · `totalCents` (`fonte da verdade`, `snapshot`,
+`auditoria`) · `statusNote` · máquina de estado `PENDING` →
+`IN_TRANSIT` → `DELIVERED` / `CANCELED` · `soft delete` com
+`deletedAt` · `audit trail` em `order_status_history`.
 
-A validação roda o algoritmo oficial **mod-11** sobre os dígitos
-verificadores — CPF com formato correto mas DV errado (ex:
-`123.456.789-00`) é rejeitado. CPFs como `111.111.111-11` também são
-recusados (todos dígitos iguais é caso especial do algoritmo).
+### HTTP, contratos e respostas
 
-### Por que `priceCents` é inteiro em centavos e não `price: 49.90` em reais?
+`400 vs 422` (`RFC 4918`) · formato padronizado de erro (`code`,
+`message`, `details`, `requestId`) · paginação `{data, meta}` ·
+filtros `startDate`/`endDate`/`status`/`sort` · proteção contra
+`mass assignment` (`whitelist`, `forbidNonWhitelisted`).
 
-Para evitar erros de ponto flutuante. JavaScript usa IEEE 754, então
-`0.1 + 0.2 === 0.30000000000000004`. Em uma API que soma preços, isso
-vira diferença de centavos no total do pedido — bug clássico de
-e-commerce.
+### Bibliotecas — por que cada uma
 
-A solução padrão da indústria é armazenar **inteiros em centavos** e
-formatar para reais só na exibição (frontend). R$ 49,90 = `4990`,
-R$ 1.599,00 = `159900`. Soma, multiplicação e armazenamento são todos
-exatos.
+`NestJS` (vs `Express`, vs `Fastify`, vs `Go`) · `Prisma` (vs
+`TypeORM`, vs `Sequelize`) · `Postgres` (vs `MongoDB`) · `zod` no
+env vs `class-validator` no HTTP · `class-transformer` ·
+`nestjs-pino` (vs `Winston`) · `Helmet` (`CSP`, `HSTS`, `XSS`) ·
+`@nestjs/throttler` · `@nestjs/swagger` · `Passport` +
+`passport-jwt` · `tsx` (vs `ts-node`) · `@faker-js/faker` · `Husky`
 
-Alternativa seria `Decimal` (Prisma suporta), mas exige biblioteca de
-big-decimal no client e perde simplicidade. Cents-as-int é o padrão
-adotado por Stripe, Square, Mercado Pago e a maioria das APIs de
-pagamento.
+- `commitlint` + `lint-staged`.
 
-### Por que `totalCents` vem na response? O frontend não consegue calcular?
+### Banco e persistência
 
-Três motivos:
+`OrderNumber` via Postgres `SEQUENCE` (`nextval`, `race
+condition`) · `OrderItem` em tabela (vs `JSONB`) · `CHECK
+constraints` como defesa em profundidade · seed idempotente com
+`Argon2` + `Faker`.
 
-1. **Fonte da verdade no backend.** Se o cálculo está em dois lugares
-   (front e back), em algum momento eles vão divergir — alguém esquece
-   de aplicar uma regra (desconto, frete, imposto). O backend é o único
-   responsável pelo total.
-2. **Garantia transacional.** O total é calculado dentro da mesma
-   transação que persiste os itens. Se o cliente recebe `totalCents`,
-   ele é exatamente o que está no banco.
-3. **Auditoria.** O `totalCents` salvo é o snapshot daquele momento — se
-   amanhã mudar a regra de cálculo (ex: adicionar frete), pedidos
-   antigos continuam consistentes porque o valor está congelado.
+### Arquitetura
 
-O cliente pode (e deve) recalcular para validar, mas a referência é
-sempre o `totalCents` que o servidor devolve.
+`DDD tático` (vs `Clean Architecture`) · `Value Object` (`Money`,
+`Document`, `Address`, `OrderNumber`) · `Aggregate Root` (`Order`
+governa `OrderItem`) · `Use Case` · `Repository pattern` (`port and
+adapter`, `InMemoryOrderRepository` em testes).
 
-### Por que transição de status inválida retorna `422` e não `400`?
+### Operação, testes e deploy
 
-`400 Bad Request` é usado para input mal formado (JSON quebrado, tipo
-errado, campo obrigatório ausente). `422 Unprocessable Entity` é a
-resposta correta quando o input está sintaticamente correto **mas viola
-uma regra de negócio** — caso clássico de tentar `PENDING → DELIVERED`
-pulando `IN_TRANSIT`.
-
-A API segue a recomendação da [RFC 4918](https://datatracker.ietf.org/doc/html/rfc4918#section-11.2):
-o cliente mandou JSON válido, com `status` que existe no enum, em um
-recurso que existe — mas o estado atual do recurso não permite essa
-mudança. Isso é 422, não 400.
-
-### As transições de status seguem qual máquina de estado?
-
-```
-PENDING ──→ IN_TRANSIT ──→ DELIVERED  (terminal)
-   │            │
-   └────────────┴──→ CANCELED  (terminal)
-```
-
-Regras:
-
-- `PENDING → DELIVERED` é proibido (pula etapa).
-- `IN_TRANSIT → PENDING` é proibido (não volta).
-- `DELIVERED` e `CANCELED` são terminais — não saem de lá.
-- Qualquer status pode ir para `CANCELED` antes de virar `DELIVERED`.
-
-### O que dá para editar via PATCH? Por que `customerName` e `id` não aparecem?
-
-O DTO de update é uma **whitelist**: campos não listados são rejeitados
-(`400` com `property X should not exist`).
-
-Campos **editáveis**:
-
-- `status` — respeitando a máquina de estado
-- `deliveryAddress` — substitui o objeto inteiro
-- `deliveryForecastAt`
-- `items` — substitui o array inteiro (e `totalCents` é recalculado)
-- `statusNote` — texto opcional registrado no `OrderStatusHistory`
-  quando o `status` muda
-
-Campos **imutáveis** (decisão de domínio):
-
-- `id`, `number`, `createdAt`, `updatedAt`, `totalCents` — gerenciados
-  pelo servidor
-- `customerName`, `customerDocument` — o cliente é um snapshot do
-  pedido. Mudar o nome do cliente em um pedido já criado é fraude no
-  domínio de e-commerce/logística — se errou, cancela e refaz.
-
-### Onde fica o audit trail de mudanças de status?
-
-Tabela `order_status_history` no Postgres. A criação do pedido grava
-uma primeira linha (`fromStatus: null → toStatus: PENDING`) e cada PATCH
-que mude o `status` grava uma nova linha com `fromStatus`, `toStatus`,
-`notes` (do campo `statusNote` do PATCH), `changedById` e `changedAt`.
-**Não é exposto via HTTP por padrão** — você consegue ver via Adminer
-(`http://localhost:8080`) ou Prisma Studio (`npm run db:studio`).
-
-Expor via `GET /v1/orders/:id/history` é um próximo passo natural.
-
-### Posso rodar os testes?
-
-Sim. `npm test` roda 53 testes unitários em 12 suites cobrindo value
-objects, use cases, validators e o algoritmo CPF/CNPJ. `npm run test:cov`
-gera cobertura.
+`npm run db:seed` · `prisma migrate dev` vs `migrate deploy` ·
+`Jest` + `Supertest` · `CI` no `GitHub Actions` · `Docker
+multistage` (`node:22-alpine`, non-root) · deploy no `Render` +
+`Neon` (`free tier`, `cold start`) · `docker compose down -v` para
+reset.
 
 ---
 
