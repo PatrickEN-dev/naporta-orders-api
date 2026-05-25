@@ -27,7 +27,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -40,9 +40,10 @@
     ]
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -64,6 +65,7 @@
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "tsx": "^4.22.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -71,7 +73,6 @@
     "@commitlint/config-conventional": "^21.0.1",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^10.4.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
