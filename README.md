@@ -426,8 +426,10 @@ Campos **imutáveis** (decisão de domínio):
 
 ### Onde fica o audit trail de mudanças de status?
 
-Tabela `OrderStatusHistory` no Postgres. Cada PATCH que mude o `status`
-grava uma linha com `previousStatus`, `newStatus`, `note` e `changedAt`.
+Tabela `order_status_history` no Postgres. A criação do pedido grava
+uma primeira linha (`fromStatus: null → toStatus: PENDING`) e cada PATCH
+que mude o `status` grava uma nova linha com `fromStatus`, `toStatus`,
+`notes` (do campo `statusNote` do PATCH), `changedById` e `changedAt`.
 **Não é exposto via HTTP por padrão** — você consegue ver via Adminer
 (`http://localhost:8080`) ou Prisma Studio (`npm run db:studio`).
 
