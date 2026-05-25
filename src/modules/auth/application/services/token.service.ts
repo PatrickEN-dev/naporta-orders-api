@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'node:crypto';
 import type { Env } from '../../../../config/env.schema';
 import type { AuthTokens, AuthenticatedUser } from '../dtos/auth-tokens';
 
@@ -18,14 +19,20 @@ export class TokenService {
 
   async issueTokens(payload: TokenPayload): Promise<AuthTokens> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwt.signAsync(payload, {
-        secret: this.config.get('JWT_ACCESS_SECRET', { infer: true }),
-        expiresIn: this.config.get('JWT_ACCESS_TTL', { infer: true }),
-      }),
-      this.jwt.signAsync(payload, {
-        secret: this.config.get('JWT_REFRESH_SECRET', { infer: true }),
-        expiresIn: this.config.get('JWT_REFRESH_TTL', { infer: true }),
-      }),
+      this.jwt.signAsync(
+        { ...payload, jti: randomUUID() },
+        {
+          secret: this.config.get('JWT_ACCESS_SECRET', { infer: true }),
+          expiresIn: this.config.get('JWT_ACCESS_TTL', { infer: true }),
+        },
+      ),
+      this.jwt.signAsync(
+        { ...payload, jti: randomUUID() },
+        {
+          secret: this.config.get('JWT_REFRESH_SECRET', { infer: true }),
+          expiresIn: this.config.get('JWT_REFRESH_TTL', { infer: true }),
+        },
+      ),
     ]);
     return { accessToken, refreshToken };
   }
