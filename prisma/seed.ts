@@ -1,12 +1,92 @@
-import { faker } from '@faker-js/faker';
+import { fakerPT_BR as faker } from '@faker-js/faker';
 import { type OrderStatus, PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const ADMIN_EMAIL = 'admin@naporta.test';
 const ADMIN_PASSWORD = 'Admin@123';
 const ORDERS_TO_SEED = 50;
+
 const STATUSES: OrderStatus[] = ['PENDING', 'IN_TRANSIT', 'DELIVERED', 'CANCELED'];
-const UF_LIST = ['SP', 'RJ', 'MG', 'RS', 'PR', 'SC', 'BA', 'PE', 'CE', 'GO'];
+
+const BRAZILIAN_CITIES: Array<{ city: string; state: string }> = [
+  { city: 'São Paulo', state: 'SP' },
+  { city: 'Campinas', state: 'SP' },
+  { city: 'Santos', state: 'SP' },
+  { city: 'São Bernardo do Campo', state: 'SP' },
+  { city: 'Rio de Janeiro', state: 'RJ' },
+  { city: 'Niterói', state: 'RJ' },
+  { city: 'Belo Horizonte', state: 'MG' },
+  { city: 'Uberlândia', state: 'MG' },
+  { city: 'Porto Alegre', state: 'RS' },
+  { city: 'Curitiba', state: 'PR' },
+  { city: 'Florianópolis', state: 'SC' },
+  { city: 'Joinville', state: 'SC' },
+  { city: 'Salvador', state: 'BA' },
+  { city: 'Recife', state: 'PE' },
+  { city: 'Fortaleza', state: 'CE' },
+  { city: 'Goiânia', state: 'GO' },
+  { city: 'Brasília', state: 'DF' },
+];
+
+const DISTRICTS = [
+  'Centro',
+  'Jardim América',
+  'Vila Mariana',
+  'Bela Vista',
+  'Pinheiros',
+  'Moema',
+  'Tijuca',
+  'Copacabana',
+  'Ipanema',
+  'Botafogo',
+  'Boa Viagem',
+  'Savassi',
+  'Batel',
+  'Cabral',
+  'Asa Norte',
+  'Asa Sul',
+  'Aldeota',
+  'Meireles',
+  'Barra',
+];
+
+const STREET_PREFIXES = ['Rua', 'Avenida', 'Alameda', 'Travessa', 'Praça'];
+
+const COMPLEMENTS = [
+  'Apto 101',
+  'Apto 202',
+  'Apto 1504',
+  'Casa',
+  'Casa 2',
+  'Bloco A',
+  'Bloco B',
+  'Fundos',
+  'Loja 1',
+  'Sala 305',
+];
+
+const PRODUCTS: Array<{ name: string; min: number; max: number }> = [
+  { name: 'Camiseta básica algodão', min: 3990, max: 7990 },
+  { name: 'Camisa polo manga curta', min: 8990, max: 14990 },
+  { name: 'Bermuda jeans masculina', min: 9990, max: 16990 },
+  { name: 'Calça jeans slim', min: 14990, max: 24990 },
+  { name: 'Tênis casual unissex', min: 19990, max: 39990 },
+  { name: 'Tênis esportivo corrida', min: 24990, max: 49990 },
+  { name: 'Mochila escolar reforçada', min: 12990, max: 22990 },
+  { name: 'Boné aba reta', min: 4990, max: 8990 },
+  { name: 'Meia esportiva (par)', min: 1990, max: 3990 },
+  { name: 'Cinto de couro legítimo', min: 8990, max: 14990 },
+  { name: 'Carteira slim', min: 5990, max: 12990 },
+  { name: 'Relógio digital esportivo', min: 14990, max: 29990 },
+  { name: 'Mouse sem fio ergonômico', min: 6990, max: 14990 },
+  { name: 'Teclado mecânico ABNT2', min: 19990, max: 39990 },
+  { name: 'Fone de ouvido Bluetooth', min: 12990, max: 34990 },
+  { name: 'Caixa de som portátil', min: 9990, max: 19990 },
+  { name: 'Garrafa térmica 750ml', min: 4990, max: 9990 },
+  { name: 'Caderno universitário 200 folhas', min: 2490, max: 4990 },
+  { name: 'Kit canetas esferográficas', min: 990, max: 1990 },
+  { name: 'Cabo USB-C 2 metros', min: 1990, max: 3990 },
+];
 
 const prisma = new PrismaClient();
 
@@ -62,6 +142,27 @@ function randomDocument(): string {
   return faker.datatype.boolean() ? generateCpf() : generateCnpj();
 }
 
+function randomStreet(): string {
+  const prefix = faker.helpers.arrayElement(STREET_PREFIXES);
+  return `${prefix} ${faker.person.lastName()}`;
+}
+
+function randomZipCode(): string {
+  return faker.string.numeric(8);
+}
+
+function randomItems() {
+  const itemsCount = faker.number.int({ min: 1, max: 4 });
+  return Array.from({ length: itemsCount }).map(() => {
+    const product = faker.helpers.arrayElement(PRODUCTS);
+    return {
+      description: product.name,
+      priceCents: faker.number.int({ min: product.min, max: product.max }),
+      quantity: faker.number.int({ min: 1, max: 3 }),
+    };
+  });
+}
+
 async function seedOrders(): Promise<void> {
   await ensureSequence();
   const year = new Date().getFullYear();
@@ -72,12 +173,8 @@ async function seedOrders(): Promise<void> {
     const status = faker.helpers.arrayElement(STATUSES);
     const createdAt = faker.date.recent({ days: 90 });
     const deliveryForecastAt = faker.date.soon({ days: 30, refDate: createdAt });
-    const itemsCount = faker.number.int({ min: 1, max: 5 });
-    const items = Array.from({ length: itemsCount }).map(() => ({
-      description: faker.commerce.productName(),
-      priceCents: faker.number.int({ min: 1000, max: 50000 }),
-      quantity: faker.number.int({ min: 1, max: 4 }),
-    }));
+    const location = faker.helpers.arrayElement(BRAZILIAN_CITIES);
+    const items = randomItems();
     const totalCents = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
 
     await prisma.order.create({
@@ -85,15 +182,15 @@ async function seedOrders(): Promise<void> {
         number,
         customerName: faker.person.fullName(),
         customerDocument: randomDocument(),
-        deliveryZipCode: faker.string.numeric(8),
-        deliveryStreet: faker.location.street(),
-        deliveryNumber: String(faker.number.int({ min: 1, max: 9999 })),
-        deliveryComplement: faker.helpers.maybe(
-          () => `Apto ${faker.number.int({ min: 1, max: 200 })}`,
-        ),
-        deliveryDistrict: faker.location.county(),
-        deliveryCity: faker.location.city(),
-        deliveryState: faker.helpers.arrayElement(UF_LIST),
+        deliveryZipCode: randomZipCode(),
+        deliveryStreet: randomStreet(),
+        deliveryNumber: String(faker.number.int({ min: 1, max: 3500 })),
+        deliveryComplement: faker.helpers.maybe(() => faker.helpers.arrayElement(COMPLEMENTS), {
+          probability: 0.6,
+        }),
+        deliveryDistrict: faker.helpers.arrayElement(DISTRICTS),
+        deliveryCity: location.city,
+        deliveryState: location.state,
         deliveryCountry: 'BR',
         deliveryForecastAt,
         status,
